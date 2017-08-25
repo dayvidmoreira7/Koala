@@ -1,0 +1,899 @@
+<center>
+<canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;"></canvas>
+</center>
+<body bgcolor="0F0F1A"> 
+<script>   
+															// ENTER = 13        PLAY : 
+	// Ligando o canvas ao código javascript
+	var canvas = document.getElementById("myCanvas");
+	var context = canvas.getContext("2d");
+	
+	// captura de tempo para independência de FPS do computador                     ANIMAÇÃÃÃÃÃÃOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+	var data = new Date();
+	var start = data.getTime();
+	
+	var current;	
+	var currentFrame = 0;
+	
+	// Array [IMAGENS] para [ANIMAÇÃO]
+	var esq = new Array();
+	var dir = new Array();
+	var numFrames = 4;
+	
+	// preenchendo o array com [IMAGENS] e carregando as [IMAGENS]
+	for (var i = 0; i < numFrames; i++)
+	{
+	    esq[i] = new Image();
+		esq[i].src = "geral/esquerda/f" + (i+1) + ".png";
+	}	
+	
+	// preenchendo o array com [IMAGENS] e carregando as [IMAGENS]
+	for (var i = 0; i < numFrames; i++)
+	{
+	    dir[i] = new Image();
+		dir[i].src = "geral/direita/f" + (i+1) + ".png";
+	}	
+	
+	function deltaTime()
+	{
+		current = (new Date()).getTime();		
+		
+		//tempo de jogo
+		//console.log((current - startGame) / 1000); 
+		
+		elapsed = current - start;
+		start = current;
+		var delta = elapsed / 1000;			
+		//console.log(delta);
+		return delta;
+	}	
+	// 																				ATÉ AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+	
+	//MENU        ||         TODAS AS VARIAVEIS
+	var menu = new Image() ; menu.src = "geral/menu.jpg"
+	var menux = 0
+	var menuy = 0
+	var menuz = canvas.width
+	var menuw = canvas.height
+	
+	//INSTRU
+	var instru = new Image() ; instru.src = "geral/instruct.jpg"
+	var instrux = 0
+	var instruy = 0
+	var instruz = canvas.width
+	var instruw = canvas.height
+	
+	//CREDIT
+	var credit = new Image() ; credit.src = "geral/creditos.jpg"
+	var creditx = 0
+	var credity = 0
+	var creditz = canvas.width
+	var creditw = canvas.height
+	
+	//VITORIA
+	var win = new Image() ; win.src = "geral/vitoria.jpg"
+	var winx = 0
+	var winy = 0
+	var winz = canvas.width
+	var winw = canvas.height
+	
+	//DERROTA
+	var loser = new Image() ; loser.src = "geral/derrota.jpg"
+	var losx = 0
+	var losy = 0
+	var losz = canvas.width
+	var losw = canvas.height
+	
+	//MUSICAS
+	var audios = new Array();
+	var ax = 25
+	var ay = 25
+	var az = 50
+	var aw = 50
+	var audio = true
+	var controleaudio = 1
+	
+	for(var ae = 0; ae < 2; ae++)
+	{
+		audios[ae] = new Image();
+		audios[ae].src = "geral/audio" + (ae+1) + ".png"
+	}
+	
+	var menusong = new Audio("geral/audios/menu.mp3")
+	var play1song = new Audio("geral/audios/1-10.mp3")
+	var play2song = new Audio("geral/audios/10-20.mp3")
+	var play3song = new Audio("geral/audios/20-30.mp3")
+	var losersong = new Audio("geral/audios/derrota.mp3")
+	var winsong = new Audio("geral/audios/vitoria.mp3")
+	var losercontrol = 0
+	
+	//CONTROLADOR DE CENAS
+	var sceneManager = "menu"
+	
+	//MOUSE
+	var mouseX;
+	var mouseY;
+	var mouseUp = false;
+	
+	//CENARIO
+	var o = Math.floor(Math.random () * 5)
+	var cen = new Array()
+	var numcen = 5
+			for(var i = 0; i < numcen; i++)
+			{
+				cen[i] = new Image()
+				cen[i].src = "geral/cenario/BG" + (i+1) + ".png";
+			}
+	
+//	var cen = new Image() ; cen.src = "Koala/geral/cenario/BG1.png"
+	var cenx = 0
+	var ceny = 0
+	var cenz = canvas.width
+	var cenw = canvas.height
+
+	//FASES
+	var fase = localStorage.getItem("numFase") === null ? 1 : localStorage.getItem("numFase");
+	var mudarf = false
+	var num = 0
+	var playGame = false
+	
+	//CONTROLADOR DE FASES
+	var derrota = false
+	
+	var plat1 = true
+	var plat2 = true
+	var plat3 = true
+	var plat4 = true
+	
+	
+	//PERSONAGEM
+	var persoesq = new Image(); persoesq.src = "geral/personagemesq.png"
+	var persodir = new Image(); persodir.src = "geral/personagemdir.png"
+	var caindoesq = new Image(); caindoesq.src = "geral/esquerda.png"
+	var caindodir = new Image(); caindodir.src = "geral/direita.png"
+	var x = ((canvas.width / 2) - 25)
+	var y = 320
+	var z = 80
+	var w = 120
+	var speed_x = 10
+	var speed_y = 10
+	var olharesq = false
+	var olhardir = false
+	var caindo = false
+	
+	//MOVIMENTOS PERSONAGEM
+	var moveLeft = false
+	var moveRight = false
+	var moveUp = false
+	var moveDown = false
+	var ctrl = false
+	
+	//CONDIÇÕES PARA "ENTER"
+	var enter = false
+	var darenter = false
+	var enterf = false
+	
+	//TECLADOS
+	var _keyDown = function(e)
+	{
+			key = e.keyCode
+		switch(e.keyCode) {
+	
+			case 37:
+				moveLeft = true
+				olhardir = true
+				olharesq = false
+				break
+			case 39:
+				moveRight = true
+				olharesq = true
+				olhardir = false
+				break
+			case 38:
+				moveUp = true
+				break
+			case 40:
+				moveDown = true
+				break
+			case 13:
+				enter = true
+		if(darenter)	enterf = true
+				break
+			case 17:
+				ctrl = true
+				break
+			default:
+				console.log("key: " + key)
+		}
+	}
+	
+	var _keyUp = function(e)
+	{
+			key = e.keyCode
+		switch(e.keyCode) {
+	
+			case 37:
+				moveLeft = false
+				break
+			case 39:
+				moveRight = false
+				break
+			case 38:
+				moveUp = false
+				break
+			case 40:
+				moveDown = false
+				break
+			case 13:
+				enter = false
+				break
+			case 17:
+				ctrl = false
+				break
+			default:
+				console.log("key: " + key)
+		}
+	}
+	
+	//MOUSE
+	var _mouseUp = function(e)
+	{
+		mouseX = e.x;
+		mouseY = e.y;
+		mouseUp = true;
+	}	
+	//REGISTRANDO FUNÇÕES
+	document.addEventListener("keydown", _keyDown, true);
+	document.addEventListener("keyup",   _keyUp,   true);
+	document.addEventListener("mouseup", _mouseUp, true);
+	
+	//FUNÇÕES DRAW
+	function drawImage(image,x,y,z,w) 
+	{
+		context.drawImage(image,x,y,z,w)
+	}
+	
+	function drawFase(fase,plat1,plat2,plat3,plat4) 
+	{
+	//VARIAVEIS PLATAFORMAS 1
+		//OPLAT
+	var plat1 = plat1
+	var plat2 = plat2	
+	var plat3 = plat3
+	var plat4 = plat4
+	
+	var enun = new Image() ; enun.src = "fases/fase" + fase + "/quest" + fase + ".png"
+	var enunx = 110
+	var enuny = 0
+	var enunz = 500
+	var enunw = 234
+	
+	var torre = new Image() ; torre.src = "fases/fase" + fase + "/" + fase + ".png"
+	var tx = 700
+	var ty = 15
+	var tz = 85
+	var tw = 400
+	
+	drawImage(enun,enunx,enuny,enunz,enunw)
+	if(ctrl)	drawImage(torre,tx,ty,tz,tw)
+	
+		//PLAT E COLISOES
+	if(plat1) {
+	var plat1 = new Image() ; plat1.src = "geral/plataformas/A.png"
+	var x1 = 0
+	var y1 = 450
+	var z1 = 200 
+	var w1 = 150
+	
+	drawImage(plat1,x1,y1,z1,w1)
+	if(y + w > y1 && y < y1 + w1 && x < x1 + z1 && x + z > x1) {
+		y = y1 - w
+	}
+}	
+	if(plat2) {
+	var plat2 = new Image() ; plat2.src = "geral/plataformas/B.png"
+	var x2 = 200
+	var y2 = 450
+	var z2 = 200
+	var w2 = 150
+	
+	drawImage(plat2,x2,y2,z2,w2)
+	if(y + w > y2 && y < y2 + w2 && x < x2 + z2 && x + z > x2) {
+		y = y2 - w
+	}
+}	
+	if(plat3) {
+	var plat3 = new Image() ; plat3.src = "geral/plataformas/C.png"
+	var x3 = 400
+	var y3 = 450
+	var z3 = 200
+	var w3 = 150
+	
+	drawImage(plat3,x3,y3,z3,w3)
+	if(y + w > y3 && y < y3 + w3 && x < x3 + z3 && x + z > x3) {
+		y = y3 - w
+	}		
+}	
+	if(plat4) {
+	var plat4 = new Image() ; plat4.src = "geral/plataformas/D.png"
+	var x4 = 600
+	var y4 = 450
+	var z4 = 200
+	var w4 = 150
+		
+	drawImage(plat4,x4,y4,z4,w4)
+	if(y + w > y4 && y < y4 + w4 && x < x4 + z4 && x + z > x4) {
+		y = y4 - w
+	} 
+}		}
+
+	function drawMenu() 
+	{
+		drawImage(menu,menux,menuy,menuz,menuw)
+		drawImage(audios[controleaudio], ax, ay, az, aw)
+	}
+	function drawInstru()
+	{
+		drawImage(instru,instrux,instruy,instruz,instruw)
+		drawImage(audios[controleaudio], ax, ay, az, aw)
+	}
+	function drawCredit()
+	{
+		drawImage(credit,creditx,credity,creditz,creditw)
+		drawImage(audios[controleaudio], ax, ay, az, aw)
+	}
+	function drawWin()
+	{
+		drawImage(win,winx,winy,winz,winw)
+		drawImage(audios[controleaudio], ax, ay, az, aw)
+	}
+	function drawLoser()
+	{
+		drawImage(loser,losx,losy,losz,losw)
+		drawImage(audios[controleaudio], ax, ay, az, aw)
+	}
+	function drawGame()
+	{
+		drawImage(cen[o],cenx,ceny,cenz,cenw)
+		drawImage(audios[controleaudio], ax, ay, az, aw)
+		if(!olharesq && !olhardir && !caindo || moveLeft && moveRight && !caindo)	context.drawImage(persoesq, x, y, z, w)
+		if(!olhardir && olharesq && !moveRight && !moveLeft && !caindo)	context.drawImage(persoesq, x, y, z, w)
+		if(!olharesq && olhardir && !moveLeft && !moveRight && !caindo)	context.drawImage(persodir, x, y, z, w)
+		if(caindo && !olhardir)	context.drawImage(caindoesq, x, y, z, w)
+		if(caindo && !olharesq)	context.drawImage(caindodir, x, y, z, w)
+		if(moveRight && !moveLeft && !caindo)	context.drawImage(dir[Math.floor((currentFrame) % numFrames)], x, y, z, w);	
+		if(moveLeft && !moveRight && !caindo)	context.drawImage(esq[Math.floor((currentFrame) % numFrames)], x, y, z, w);			
+		drawFase(fase,plat1,plat2,plat3,plat4)
+	}
+	
+	//FUNÇÕES PARA CLICK
+	function buttonPlayMenu()
+	{
+		if(mouseUp)
+		{
+			if(mouseX >= 649 && mouseX <= 804 && mouseY >= 349 && mouseY <= 382)
+			{
+				sceneManager = "play";
+			}
+			else if(mouseX >= 649 && mouseX <= 804 && mouseY >= 397 && mouseY <= 432)
+			{
+				sceneManager = "instru";
+			}
+			else if(mouseX >= 649 && mouseX <= 804 && mouseY >= 445 && mouseY <= 479)
+			{
+				sceneManager = "creditos";
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 0)
+			{
+				controleaudio = 1
+				audio = true
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 1)
+			{
+				controleaudio = 0
+				audio = false
+			}
+			console.log(mouseX + " " + mouseY)
+			mouseUp = false;
+		}
+	}
+	function buttonPlayInstru() 
+	{
+		if(mouseUp) 
+		{
+			if(mouseX >= 958 && mouseX <= 1081 && mouseY >= 537 && mouseY <= 567 && sceneManager == "instru")
+			{
+				sceneManager = "menu"
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 0)
+			{
+				controleaudio = 1
+				audio = true
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 1)
+			{
+				controleaudio = 0
+				audio = false
+			}
+			console.log(mouseX + " " + mouseY)
+			mouseUp = false;
+		}
+	}
+	function buttonPlayCredit() 
+	{
+		if(mouseUp) 
+		{
+			if(mouseX >= 949 && mouseX <= 1084 && mouseY >= 543 && mouseY <= 572 && sceneManager == "creditos")
+			{
+				sceneManager = "menu"
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 0)
+			{
+				controleaudio = 1
+				audio = true
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 1)
+			{
+				controleaudio = 0
+				audio = false
+			}
+			console.log(mouseX + " " + mouseY)
+			mouseUp = false;
+		}
+	}
+	function buttonPlayWin()
+	{
+	if(mouseUp)
+		{
+			if(mouseX >= 909 && mouseX <= 1045 && mouseY >= 546 && mouseY <= 573 && sceneManager == "vitoria")
+			{
+				sceneManager = "menu"
+			} 
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 0)
+			{
+				controleaudio = 1
+				audio = true
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 1)
+			{
+				controleaudio = 0
+				audio = false
+			}
+			console.log(mouseX + " " + mouseY)
+			mouseUp = false;
+		}
+	} 
+	function buttonPlayLoser()
+	{
+	if(mouseUp)
+		{
+			if(mouseX >= 909 && mouseX <= 1045 && mouseY >= 546 && mouseY <= 573 && sceneManager == "derrota") 
+			{
+				sceneManager = "menu"
+				enterf = false
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 0)
+			{
+				controleaudio = 1
+				audio = true
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 1)
+			{
+				controleaudio = 0
+				audio = false
+			}
+			console.log(mouseX + " " + mouseY)
+			mouseUp = false
+		}
+	}
+	function buttonPlayGame()
+	{
+	if(mouseUp)
+		{
+			if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 0)
+			{
+				controleaudio = 1
+				audio = true
+			}
+			else if(mouseX >= 337 && mouseX <= 386 && mouseY >= 34 && mouseY <= 83 && controleaudio == 1)
+			{
+				controleaudio = 0
+				audio = false
+			}
+			console.log(mouseX + " " + mouseY)
+			mouseUp = false
+		}
+	}
+	
+	//MUSICAS
+	function songManager()
+	{
+	if(audio) {
+		if(sceneManager == "menu")
+		{
+			menusong.play();
+			play1song.pause();
+			play1song.currentTime = 0
+			play2song.pause();
+			play2song.currentTime = 0
+			play3song.pause();
+			play3song.currentTime = 0
+			losersong.pause();
+			losersong.currentTime = 0
+			winsong.pause();
+			winsong.currentTime = 0
+		}
+		if(sceneManager == "play" && fase <= 10)
+		{
+			menusong.pause();
+			menusong.currentTime = 0
+			play1song.play();
+			play2song.pause();
+			play2song.currentTime = 0
+			play3song.pause();
+			play3song.currentTime = 0
+			losersong.pause();
+			losersong.currentTime = 0
+			winsong.pause();
+			winsong.currentTime = 0
+		}
+		if(sceneManager == "play" && fase > 10 && fase <= 20)
+		{
+			menusong.pause();
+			menusong.currentTime = 0
+			play1song.pause();
+			play1song.currentTime = 0
+			play2song.play();
+			play3song.pause();
+			play3song.currentTime = 0
+			losersong.pause();
+			losersong.currentTime = 0
+			winsong.pause();
+			winsong.currentTime = 0
+		}
+		if(sceneManager == "play" && fase > 20 && fase <= 30)
+		{
+			menusong.pause();
+			menusong.currentTime = 0
+			play1song.pause();
+			play1song.currentTime = 0
+			play2song.pause();
+			play2song.currentTime = 0
+			play3song.play();
+			losersong.pause();
+			losersong.currentTime = 0
+			winsong.pause();
+			winsong.currentTime = 0
+		}
+//		if(sceneManager == "vitoria") {}
+		if(sceneManager == "derrota")
+		{
+			menusong.pause();
+			menusong.currentTime = 0
+			play1song.pause();
+			play1song.currentTime = 0
+			play2song.pause();
+			play2song.currentTime = 0
+			play3song.pause();
+			play3song.currentTime = 0
+			winsong.pause();
+			winsong.currentTime = 0
+			
+	if(losercontrol < 100)		
+	{
+	losersong.play();
+	}
+	else
+	{
+	losersong.pause();
+	losersong.currentTime = 0
+	}
+
+		}
+		if(sceneManager == "vitoria")
+		{
+			menusong.pause();
+			menusong.currentTime = 0
+			play1song.pause();
+			play1song.currentTime = 0
+			play2song.pause();
+			play2song.currentTime = 0
+			play3song.pause();
+			play3song.currentTime = 0
+			losersong.pause();
+			losersong.currentTime = 0
+			winsong.play();
+		}
+		}
+		if(audio == false)
+		{
+			menusong.pause();
+			menusong.currentTime = 0
+			play1song.pause();
+			play1song.currentTime = 0
+			play2song.pause();
+			play2song.currentTime = 0
+			play3song.pause();
+			play3song.currentTime = 0
+			losersong.pause();
+			losersong.currentTime = 0
+			winsong.pause();
+			winsong.currentTime = 0
+		}
+	}
+	
+	//FUNÇÕES PARA UPDATE DO JOGO (FASE E PERSONAGEM)
+	function updatePlay() {
+		if(moveLeft) {
+		x -= speed_x
+		}
+		if(moveRight) {
+		x += speed_x
+		}
+		if(moveUp == false) {
+		y += speed_y
+		}
+		else {
+		y += speed_y
+		}
+		if(enterf == true) 
+		{
+		speed_x = 0
+		}
+		else 
+		{
+		speed_x = 10
+		}
+		
+		// COLISAO LADOS
+		if(x < 0) {
+		x = 0
+		}
+		if(x + z > canvas.width) {
+		x = canvas.width - z
+		}
+		if(y < 0) {
+		y = 0
+		}
+		if(olharesq)	olhardir = false
+		if(olhardir)	olharesq = false
+		if(!enterf && !darenter || enterf && darenter)
+		{
+		caindo = true
+		}
+		else
+		{
+		caindo = false
+		}
+	}
+	
+	function updateFase() 
+	{
+	//MUSICAS
+	//songManager()
+/*	if(darenter == true && enterf == true)
+	{
+		if(olharesq)	olhardir = false
+		if(olhardir)	olharesq = false
+	}	*/
+	
+	//CHECK ENTER
+	if(parseInt(y) + parseInt(w) == 450) {
+	darenter = true
+	}
+	
+	//CAINDO
+ //	if(fase == 1 && enterf && x > _ && x < _ - w)	plat_ = false
+//	if(fase == 1 && plat_ == true)	sceneManager = "derrota" 
+
+	if(enterf) {
+		if(fase == 1 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 1 && plat3 == true)	sceneManager = "derrota"
+		
+		if(fase == 2 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 2 && plat3 == true)	sceneManager = "derrota"
+		
+		if(fase == 3 && x >= 0 && x <= 200 - z)	plat1 = false
+		if(fase == 3 && plat1 == true)	sceneManager = "derrota"
+		
+		if(fase == 4 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 4 && plat3 == true)	sceneManager = "derrota"
+		
+		if(fase == 5 && x >= 000 && x <= 200 - z) 	plat1 = false
+		if(fase == 5 && plat1 == true) 	sceneManager = "derrota"
+		
+		if(fase == 6 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 6 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 7 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 7 && plat3 == true) 	sceneManager = "derrota"
+		
+		if(fase == 8 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 8 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 9 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 9 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 10 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 10 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 11 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 11 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 12 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 12 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 13 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 13 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 14 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 14 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 15 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 15 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 16 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 16 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 17 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 17 && plat3 == true) 	sceneManager = "derrota"
+		
+		if(fase == 18 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 18 && plat3 == true) 	sceneManager = "derrota"
+		
+		if(fase == 19 && x >= 0 && x <= 200 - z)	plat1 = false
+		if(fase == 19 && plat1 == true) 	sceneManager = "derrota"
+		
+		if(fase == 20 && x >= 0 && x <= 200 - z)	plat1 = false
+		if(fase == 20 && plat1 == true) 	sceneManager = "derrota"
+		
+		if(fase == 21 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 21 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 22 && x >= 0 && x <= 200 - z)	plat1 = false
+		if(fase == 22 && plat1 == true) 	sceneManager = "derrota"
+		
+		if(fase == 23 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 23 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 24 && x >= 200 && x <= 400 - z)	plat2 = false
+		if(fase == 24 && plat2 == true) 	sceneManager = "derrota"
+		
+		if(fase == 25 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 25 && plat3 == true) 	sceneManager = "derrota"
+		
+		if(fase == 26 && x >= 0 && x <= 200 - z)	plat1 = false
+		if(fase == 26 && plat1 == true) 	sceneManager = "derrota"
+		
+		if(fase == 27 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 27 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 28 && x >= 600 && x <= 800 - z)	plat4 = false
+		if(fase == 28 && plat4 == true) 	sceneManager = "derrota"
+		
+		if(fase == 29 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 29 && plat3 == true) 	sceneManager = "derrota"
+		
+		if(fase == 30 && x >= 400 && x <= 600 - z)	plat3 = false
+		if(fase == 30 && plat3 == true) 	sceneManager = "derrota"
+		
+	}
+	
+	//VITORIA
+	if(fase == 31) {
+	sceneManager = "vitoria"
+	}
+		
+	//FASE
+	if(y > 700) {
+	mudarf = true
+	}
+	else {
+	mudarf = false
+	}
+	if(mudarf) {
+	fase += 1
+	y = -100
+	plat1 = true
+	plat2 = true
+	plat3 = true
+	plat4 = true
+	darenter = false
+	enterf = false
+	o = Math.floor(Math.random () * 5)
+		}
+	}
+	
+	//FUNÇÃO RAIZ UPDATE
+	function update()
+	{
+		songManager();
+		
+		var delta = deltaTime();	
+			currentFrame += delta * 8;		
+			//console.log(currentFrame);
+	
+		if(sceneManager == "menu")
+		{
+			buttonPlayMenu();
+		if(playGame)	localStorage.setItem("numFase", fase);
+		if(playGame == false)	fase = 1
+			x = ((canvas.width / 2) - 25)
+			y = 320
+		}
+		else if(sceneManager == "play")
+		{
+			buttonPlayGame();
+			updatePlay();
+			updateFase();
+			playGame = true
+		}
+		else if(sceneManager == "instru") 
+		{
+			buttonPlayInstru();
+		}
+		else if(sceneManager == "creditos") 
+		{
+			buttonPlayCredit();
+		}
+		else if(sceneManager == "vitoria") 
+		{
+			buttonPlayWin();
+		}
+		else if(sceneManager == "derrota")
+		{
+			buttonPlayLoser();
+		}
+	}
+	
+	//FUNÇÃO RAIZ DRAW
+	function draw() 
+	{
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		if(sceneManager == "menu")
+		{
+			if(fase < 31)	drawMenu();
+		}
+		else if(sceneManager == "play")
+		{	
+			if(fase < 31)	drawGame();
+		}
+		else if(sceneManager == "instru")
+		{
+			drawInstru();
+		}
+		else if(sceneManager == "creditos")
+		{
+			drawCredit();
+		}
+		else if(sceneManager == "vitoria")
+		{
+			drawWin();
+		}
+		else if(sceneManager == "derrota")
+		{
+			drawLoser();
+		}
+	}  
+	
+	//PAI DO JOGO.
+	function loop() 
+	{
+		update()
+		draw()
+				console.log(playGame)
+		if(sceneManager == "derrota")
+		{
+		losercontrol += 1
+}	
+		else
+		{
+		losercontrol = 0
+}
+	//	console.log(losercontrol)
+			setTimeout(loop, 30)
+	}
+	//CHAMANDO O PAPAI
+	loop()
+
+</script>
